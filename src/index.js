@@ -6,7 +6,7 @@ const path = require('path')
 const app = express();
 
 // Puerto
-const port = 3001;
+const port = process.env.PORT || 8080;
 
 // middlewares
 app.use(express.urlencoded({extended: false}));

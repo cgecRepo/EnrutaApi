@@ -2,8 +2,13 @@ const { Router } = require('express');
 const router = Router();
 const mysql = require('mysql');
 const path = require('path');
+const fs = require('fs');
+const archiver = require('archiver')
 
-var dbConn = require('../public/dbconfig.js')
+var dbConn = require('../public/dbconfig.js');
+const { features } = require('process');
+const { brotliCompress } = require('zlib');
+const { resolve } = require('path');
 
 // API
 
@@ -179,5 +184,42 @@ router.get('/lecturaremota', (req, res) => {
     })
 });
 
+
+// Lecturas Indsutriales    ---------------------------------------------------------------------
+
+function zipDirectory(sourceDir, outPath) {
+    const archive = archiver('zip', { zlib: { level: 9 }});
+    const stream = fs.createWriteStream(outPath);
+  
+    return new Promise((resolve, reject) => {
+      archive
+        .directory(sourceDir, false)
+        .on('error', err => reject(err))
+        .pipe(stream)
+      ;
+  
+      stream.on('close', () => resolve());
+      archive.finalize();
+    });
+  }
+
+router.get('/lecturasindustriales/imagenes', async (req, res) => {
+    const date = new Date()
+    var fecha = date.toISOString().split("T")[0].split("-")
+    var dia = "01"
+
+    if(fecha[2] >= 9 && fecha[2] < 22){
+        dia = "15"
+    }
+
+    var fecha = fecha[0] + fecha[1] + dia
+
+    const path = './src/public/files/lecturasIndustriales/' + fecha
+    
+    zipDirectory(path, path).then(()=> {
+        res.download(path + '.zip')
+    });
+    
+});
 
 module.exports = router;

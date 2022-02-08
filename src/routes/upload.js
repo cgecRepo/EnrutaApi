@@ -177,8 +177,20 @@ router.post('/lecturasindustriales/:id', async (req, res) =>{
 
             console.log(files)
 
-            const fecha = new Date()
-            const path = './src/public/files/lecturasIndustriales/' + fecha.toDateString()
+            const date = new Date()
+            var fecha = date.toISOString().split("T")[0].split("-")
+            var dia = "01"
+
+            if(fecha[2] >= 9 && fecha[2] < 22){
+                dia = "15"
+            }
+
+            var fecha = fecha[0] + fecha[1] + dia
+            
+            console.log("La fecha es:")
+            console.log(fecha)
+
+            const path = './src/public/files/lecturasIndustriales/' + fecha
 
             if(!fs.existsSync(path)){
                 fs.mkdir(path, () => {
@@ -203,7 +215,7 @@ router.post('/lecturasindustriales/:id', async (req, res) =>{
             }
 
             // Guardamos la lectura
-            fs.appendFile(path + "/lecturas", req.params.id + ": " + req.query.lectura + "\n", function (err) {
+            fs.appendFile(path + "/lecturas.txt", req.params.id + ": " + req.query.lectura + "\n", function (err) {
                 if(err) throw err;
                 console.log('saved')
             })
